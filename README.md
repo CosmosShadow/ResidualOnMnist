@@ -10,6 +10,4 @@
 [Training and investigating Residual Nets (post, code with Torch)](http://torch.ch/blog/2016/02/04/resnets.html)    
 [https://github.com/facebook/fb.resnet.torch](https://github.com/facebook/fb.resnet.torch)    
 
-<br/>
-
 #### Usage
