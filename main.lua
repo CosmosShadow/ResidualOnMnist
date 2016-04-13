@@ -1,11 +1,5 @@
----------------------------------------------------------------------------------
-print("==> Loading required libraries")
-require 'dp'
-require 'rnn'
-require 'torch'
-require 'xlua'
-require 'optim'
-require 'image'
+-- 
+dofile '0_libs.lua'
 
 ---------------------------------------------------------------------------------
 print("==> Processing options")
@@ -32,7 +26,7 @@ cmd:option('--interval', 7, 'step interval count')
 cmd:option('--outputLength', 7, 'step interval count')
 
 -- [[ GPU ]] --
-cmd:option('--cuda', false)
+cmd:option('--cuda', true)
 cmd:option('--useDevice', 1, 'sets the device (GPU) to use')
 
 --[[ loss ]] --
@@ -64,28 +58,20 @@ print("==> Global setting")
 torch.setnumthreads(opt.threads)
 torch.manualSeed(opt.seed)
 
-
 ---------------------------------------------------------------------------------
 print("==> Loading scripts and model")
 
 dofile '1_load_data.lua'
-dofile '2_model_cnn_location.lua'
 dofile '2_model.lua'
 dofile '3_loss.lua'
 dofile '4_train.lua'
 dofile '5_test.lua'
 
 ---------------------------------------------------------------------------------
-if opt.cuda then
-	print('==> GPU')
-	require 'cutorch'
-	require 'cunn'
-	cutorch.setDevice(opt.useDevice)
-	model:cuda()
-	criterion:cuda()
-else
-	print('==> CPU')
-end
+-- set cuda
+cutorch.setDevice(opt.useDevice)
+model:cuda()
+criterion:cuda()
 
 ---------------------------------------------------------------------------------
 print('==> Uniform parameters')
@@ -98,11 +84,12 @@ end
 ---------------------------------------------------------------------------------
 print("==> Training")
 epoch = 0
-while epoch < opt.epochs do
+while epoch <= opt.epochs do
+	epoch = epoch + 1
 	train()
-	-- if epoch%5 == 0 then
+	if epoch%5 == 0 then
 		test()
-	-- end
+	end
 end
 
 

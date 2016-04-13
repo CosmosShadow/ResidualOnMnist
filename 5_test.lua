@@ -24,7 +24,7 @@ function test()
         end
 
         pred = model:forward(inputs)
-        confusion:batchAdd(pred[1][opt.interval], targets)
+        confusion:batchAdd(pred, targets)
     end
 
     -- timing

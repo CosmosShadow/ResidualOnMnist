@@ -21,9 +21,9 @@ trainData, testData = {}, {}
 local temp = torch.load('data/mnist/train.th7', 'ascii')
 trsize = temp[1]:size()[1]
 trainData.data = torch.DoubleTensor(trsize, source_height, source_width, source_channel)
-trainData.labels = torch.DoubleTensor(trsize, 1)
+trainData.labels = torch.DoubleTensor(trsize)
 for rec = 1, trsize do
-    trainData.labels[rec][1] = (temp[2][rec] == 0 and 10 or temp[2][rec])
+    trainData.labels[rec] = (temp[2][rec] == 0 and 10 or temp[2][rec])
     trainData.data[rec] = temp[1][rec]
 end
 
@@ -31,11 +31,10 @@ end
 local temp = torch.load('data/mnist/test.th7', 'ascii')
 tesize = temp[1]:size()[1]
 testData.data = torch.DoubleTensor(tesize, source_height, source_width, source_channel)
-testData.labels = torch.DoubleTensor(tesize, 1)
+testData.labels = torch.DoubleTensor(tesize)
 for rec = 1, tesize do
-    local tempData
-    testData.labels[rec][1] = (temp[2][rec] == 0 and 10 or temp[2][rec])
     testData.data[rec] = temp[1][rec]
+    testData.labels[rec] = (temp[2][rec] == 0 and 10 or temp[2][rec])
 end
 
 ---------------------------------------------------------------------------------
