@@ -85,11 +85,11 @@ end
 print("==> Training")
 epoch = 0
 while epoch <= opt.epochs do
+	print('')
+	print('==> epoch #'..epoch)
 	epoch = epoch + 1
 	train()
-	if epoch%5 == 0 then
-		test()
-	end
+	test()
 end
 
 

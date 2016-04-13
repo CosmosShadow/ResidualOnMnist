@@ -27,11 +27,6 @@ function test()
         confusion:batchAdd(pred, targets)
     end
 
-    -- timing
-    time = sys.clock() - time
-    time = time / tesize
-    print("\n==> time to test 1 sample = " .. (time * 1000) .. 'ms')
-
     -- confusion
     print(confusion)
     confusion:zero()
