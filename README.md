@@ -11,3 +11,7 @@
 [https://github.com/facebook/fb.resnet.torch](https://github.com/facebook/fb.resnet.torch)    
 
 #### Usage
+
+mnist数据库下载: [https://stife076.files.wordpress.com/2015/02/mnist4.zip](https://stife076.files.wordpress.com/2015/02/mnist4.zip)    
+解压后放在/data/mnist文件下面。   
+prepare_data.lua会预处理数据，并存储起来。   
