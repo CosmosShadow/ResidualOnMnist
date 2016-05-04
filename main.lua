@@ -81,7 +81,7 @@ end
 print '==> configuring optimizer'
 optimState = {
     learningRate = 0.1,
-    learningRateDecay = 1e-8,
+    learningRateDecay = 1e-6,
     weightDecay = 0,
     momentum = 0.9,
     nesterov = true,
@@ -108,7 +108,7 @@ end
 
 ---------------------------------------------------------------------------------
 print("==> Training")
-epoch = 0
+epoch = 1
 while epoch <= opt.epochs do
 	print('')
 	print('==> epoch #'..epoch)
