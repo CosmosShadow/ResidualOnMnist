@@ -6,6 +6,8 @@ confusion = optim.ConfusionMatrix(classes)
 print '==> defining training procedure'
 
 function train()
+    local total_error = 0
+
     model:training()
     parameters, gradParameters = model:getParameters()
     shuffle = torch.randperm(trsize)
@@ -26,23 +28,14 @@ function train()
 
         -- create closure to evaluate f(X) and df/dX
         local feval = function(x)
-            -- get new parameters
             if x ~= parameters then
                 parameters:copy(x)
             end
-
-            -- reset gradients
             gradParameters:zero()
-
-            -- f is the average of all criterions
-            local f = 0
-
-            -- estimate f
+            
+            -- forward、backword
             output = model:forward(inputs)
             local err = criterion:forward(output, targets)
-            f = f + err
-
-            -- estimate df/dW
             local df_do = criterion:backward(output, targets)
             model:backward(inputs, df_do)
 
@@ -50,10 +43,11 @@ function train()
 
             -- normalize gradients and f(X)
             gradParameters:div(inputs:size()[1])
-            f = f / inputs:size()[1]
+            err = err / inputs:size()[1]
 
-            -- return f and df/dX
-            return f, gradParameters
+            total_error = total_error + err
+
+            return err, gradParameters
         end
 
         optimMethod(feval, parameters, optimState)
@@ -61,4 +55,6 @@ function train()
 
     print(confusion)
     confusion:zero()
+
+    return total_error / trsize
 end

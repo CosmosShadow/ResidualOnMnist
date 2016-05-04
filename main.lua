@@ -99,10 +99,10 @@ optimMethod = optim.sgd
 -- }
 -- optimMethod = optim.rprop
 
-function print_lr()
+function print_lr_error(error)
 	if optimMethod == optim.sgd then
 		local clr = optimState.learningRate / (1 + optimState.evalCounter*optimState.learningRateDecay)
-		print '==> learning rate: '..clr
+		print '==> learning rate: '..clr..', error: '..error
 	end
 end
 
@@ -113,7 +113,8 @@ while epoch <= opt.epochs do
 	print('')
 	print('==> epoch #'..epoch)
 	epoch = epoch + 1
-	train()
+	local error = train()
+	print_lr_error(error)
 	test()
 end
 
