@@ -6,7 +6,7 @@ confusion = optim.ConfusionMatrix(classes)
 print '==> configuring optimizer'
 optimState = {
     learningRate = 0.01,
-    learningRateDecay = 0.01,
+    learningRateDecay = 1e-5,
     weightDecay = 0,
     momentum = 0.9,
     nesterov = true,
