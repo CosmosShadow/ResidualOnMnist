@@ -3,7 +3,7 @@
 function load_method()
 	optimState = {
 		learningRate = 0.1,
-		learningRateDecay = 1e-6,
+		learningRateDecay = 1e-5,
 		weightDecay = 0,
 		momentum = 0.9,
 		nesterov = true,
