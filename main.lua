@@ -78,36 +78,9 @@ if opt.uniform > 0 then
 end
 
 ----------------------------------------------------------------------
-
-function adjust_method(error)
-	print('==> error: '..error)
-
-	if optimMethod == optim.sgd then
-		print('==> method: sgd')
-		local clr = optimState.learningRate / (1 + optimState.evalCounter*optimState.learningRateDecay)
-		print('==> learning rate: '..clr)
-
-		-- stage
-		errortables = errortables or {}
-		if optimState.stage_length and optimState.stage_decay hen
-			if #errortables == optimState.stage_length then
-				average_error = table.sum(errortables) / optimState.stage_length
-				if (error > average_error) then
-					optimState.learningRate = optimState.learningRate * optimState.stage_decay
-				end
-				table.remove(errortables, 1)
-			end
-			-- 添加最新的error上去
-			table.add(errortables, error)
-		end
-	end
-
-	if optimMethod == optim.rprop then
-		print('==> method: rprop')
-	end
-
-	-- 动态加载学习方法、参数
-end
+-- 初始化method
+require 'Utils'
+optim.adjust_method()
 
 ---------------------------------------------------------------------------------
 print("==> Training")
@@ -117,7 +90,7 @@ while epoch <= opt.epochs do
 	print('==> epoch #'..epoch)
 	epoch = epoch + 1
 	local error = train()
-	print_lr_error(error)
+	optim.adjust_method(error)
 	test()
 end
 
