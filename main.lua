@@ -78,32 +78,35 @@ if opt.uniform > 0 then
 end
 
 ----------------------------------------------------------------------
-print '==> configuring optimizer'
-optimState = {
-    learningRate = 0.1,
-    learningRateDecay = 1e-6,
-    weightDecay = 0,
-    momentum = 0.9,
-    nesterov = true,
-    dampening = 0
-}
-optimMethod = optim.sgd
 
--- optimState = {
---     stepsize = 0.01,
---     etaplus = 1.1,
---     etaminus = 0.8,
---     stepsizemax = 50,
---     stepsizemin = 1e-8,
---     niter = 1
--- }
--- optimMethod = optim.rprop
+function adjust_method(error)
+	print('==> error: '..error)
 
-function print_lr_error(error)
 	if optimMethod == optim.sgd then
+		print('==> method: sgd')
 		local clr = optimState.learningRate / (1 + optimState.evalCounter*optimState.learningRateDecay)
-		print('==> learning rate: '..clr..', error: '..error)
+		print('==> learning rate: '..clr)
+
+		-- stage
+		errortables = errortables or {}
+		if optimState.stage_length and optimState.stage_decay hen
+			if #errortables == optimState.stage_length then
+				average_error = table.sum(errortables) / optimState.stage_length
+				if (error > average_error) then
+					optimState.learningRate = optimState.learningRate * optimState.stage_decay
+				end
+				table.remove(errortables, 1)
+			end
+			-- 添加最新的error上去
+			table.add(errortables, error)
+		end
 	end
+
+	if optimMethod == optim.rprop then
+		print('==> method: rprop')
+	end
+
+	-- 动态加载学习方法、参数
 end
 
 ---------------------------------------------------------------------------------

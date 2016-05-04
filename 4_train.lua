@@ -39,13 +39,11 @@ function train()
             local df_do = criterion:backward(output, targets)
             model:backward(inputs, df_do)
 
-            total_error = total_error + err
+            total_error = total_error + err*inputs:size()[1]
             confusion:batchAdd(output, targets)
 
             -- normalize gradients and f(X)
             gradParameters:div(inputs:size()[1])
-            err = err / inputs:size()[1]
-
 
             return err, gradParameters
         end
