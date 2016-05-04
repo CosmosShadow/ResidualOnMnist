@@ -5,10 +5,10 @@ confusion = optim.ConfusionMatrix(classes)
 ----------------------------------------------------------------------
 print '==> configuring optimizer'
 optimState = {
-    learningRate = opt.learningRate,
-    weightDecay = opt.weightDecay,
-    momentum = opt.momentum,
-    learningRateDecay = opt.learningRateDecay,
+    learningRate = 0.01,
+    learningRateDecay = 0.01,
+    weightDecay = 0.1,
+    momentum = 0.9,
     nesterov = true,
     dampening = 0
 }
