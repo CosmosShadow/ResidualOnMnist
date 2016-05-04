@@ -4,15 +4,25 @@ confusion = optim.ConfusionMatrix(classes)
 
 ----------------------------------------------------------------------
 print '==> configuring optimizer'
+-- optimState = {
+--     learningRate = opt.learningRate,
+--     weightDecay = opt.weightDecay,
+--     momentum = opt.momentum,
+--     learningRateDecay = opt.learningRateDecay,
+--     nesterov = true,
+--     dampening = 0
+-- }
+-- optimMethod = optim.sgd
+
 optimState = {
-    learningRate = opt.learningRate,
-    weightDecay = opt.weightDecay,
-    momentum = opt.momentum,
-    learningRateDecay = opt.learningRateDecay,
-    nesterov = true,
-    dampening = 0
+    stepsize = 0.01,
+    etaplus = 1.2,
+    etaminus = 0.5,
+    stepsizemax = 50,
+    stepsizemin = 1e-8,
+    niter = 1
 }
-optimMethod = optim.sgd
+optimMethod = optim.rprop
 
 ----------------------------------------------------------------------
 print '==> defining training procedure'
