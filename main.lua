@@ -102,7 +102,7 @@ optimMethod = optim.sgd
 function print_lr_error(error)
 	if optimMethod == optim.sgd then
 		local clr = optimState.learningRate / (1 + optimState.evalCounter*optimState.learningRateDecay)
-		print '==> learning rate: '..clr..', error: '..error
+		print('==> learning rate: '..clr..', error: '..error)
 	end
 end
 
