@@ -35,10 +35,6 @@ cmd:option('--loss', 'reinforce', 'type of loss function to minimize: nll | mse 
 --[[ train ]] --
 cmd:option('--save', 'testing', 'selecet subfolder where to store loggers')
 cmd:option('--batchSize', 50)
-cmd:option('--learningRate', 1e-1, 'setup the learning rate')
-cmd:option('--opt.learningRateDecay', 0, 'setup the learning rate')
-cmd:option('--momentum', 9e-1, 'setup the momentum')
-cmd:option('--weightDecay', 0, 'weight decay')
 cmd:option('--epochs', 100, 'define max number of epochs')
 cmd:option('--preTrainEpochs', 50, 'pretrain the glimpse sensor')
 cmd:option('--uniform', 0.1, 'initialize parameters using uniform distribution between -uniform and uniform. -1 means default initialization')
