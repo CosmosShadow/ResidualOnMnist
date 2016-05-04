@@ -7,7 +7,7 @@ print '==> configuring optimizer'
 optimState = {
     learningRate = 0.01,
     learningRateDecay = 0.01,
-    weightDecay = 0.1,
+    weightDecay = 0,
     momentum = 0.9,
     nesterov = true,
     dampening = 0
