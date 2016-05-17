@@ -59,8 +59,8 @@ local function createModel()
       model:add(SBatchNorm(16))
       model:add(ReLU(true))
       model:add(stackResidualBlock(stackDepth, 16, 1))
-      model:add(stackResidualBlock(stackDepth, 32, 2))
-      model:add(stackResidualBlock(stackDepth, 64, 2))
+      model:add(stackResidualBlock(stackDepth, 32, 2))	--16*16
+      model:add(stackResidualBlock(stackDepth, 64, 2))	--8*8
       model:add(Avg(8, 8, 1, 1))
       model:add(nn.View(64):setNumInputDims(3))
       model:add(nn.Linear(64, 10))
