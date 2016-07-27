@@ -15,3 +15,8 @@
 mnist数据库下载: [https://stife076.files.wordpress.com/2015/02/mnist4.zip](https://stife076.files.wordpress.com/2015/02/mnist4.zip)    
 解压后放在/data/mnist文件下面。   
 prepare_data.lua会预处理数据，并存储起来。   
+
+#### 其它
+
+博客为 [http://www.cosmosshadow.com/ml/神经网络/2016/03/16/深度残差学习.html](http://www.cosmosshadow.com/ml/神经网络/2016/03/16/深度残差学习.html)    
+如果程序跑不通，请下载使用我写的lua相关的库: [MLLuaLib](https://github.com/CosmosShadow/MLLuaLib)
