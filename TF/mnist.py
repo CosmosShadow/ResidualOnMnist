@@ -25,30 +25,38 @@ seq = pt.wrap(x_reshape).sequential()
 # seq.conv2d(6, 16)
 # seq.max_pool(2, 2)
 
+def residual(seq, stride, output):
+	with seq.subdivide_with(2, tf.add_n) as towers:
+		towers[0].conv2d(3, output, stride=stride)
+		towers[1].conv2d(3, output, stride=stride).leaky_relu().conv2d(3, output)
+	seq.leaky_relu()
+	return seq
+
+def residual_with_bt(seq, stride, output):
+	with seq.subdivide_with(2, tf.add_n) as towers:
+		towers[0].conv2d(3, output, stride=stride).batch_normalize()
+		towers[1].conv2d(3, output, stride=stride).batch_normalize().leaky_relu().conv2d(3, output).batch_normalize()
+	seq.leaky_relu()
+	return seq
+
 # residual
-with pt.defaults_scope(activation_fn=None, l2loss=1e-4):
-	with seq.subdivide_with(2, tf.add_n) as towers:
-		towers[0].conv2d(3, 16, stride=2)
-		towers[1].conv2d(3, 16, stride=2).leaky_relu().conv2d(3, 16)
-	seq.leaky_relu()
-	# with seq.subdivide_with(2, tf.add_n) as towers:
-	# 	towers[0].conv2d(3, 16)
-	# 	towers[1].conv2d(3, 16).leaky_relu().conv2d(3, 16)
-	# seq.leaky_relu()
-	with seq.subdivide_with(2, tf.add_n) as towers:
-		towers[0].conv2d(3, 16, stride=2)
-		towers[1].conv2d(3, 16, stride=2).leaky_relu().conv2d(3, 16)
-	seq.leaky_relu()
+with pt.defaults_scope(activation_fn=None, l2loss=1e-3):
+	seq.conv2d(3, 16)
+	seq = residual_with_bt(seq, 2, 16)
+	seq = residual_with_bt(seq, 1, 16)
+	seq = residual_with_bt(seq, 2, 16)
+	seq = residual_with_bt(seq, 1, 16)
+	seq = residual_with_bt(seq, 2, 32)
+	seq.average_pool(4, 4)
+	# seq.dropout(dropout[0])
 	seq.flatten()
-	seq.fully_connected(32).leaky_relu()
-	seq.dropout(dropout[0])
 	seq.fully_connected(10)					#TODO: network加上activation_fn=None
 
 softmax, loss = seq.softmax_classifier(10, labels=y)
 accuracy = softmax.evaluate_classifier(y)
 
 batch = tf.Variable(0, dtype=tf.float32)
-learning_rate = tf.train.exponential_decay(0.01, batch * 64, 64*100, 0.98, staircase=True)
+learning_rate = tf.train.exponential_decay(0.05, batch * 64, 64*100, 0.995, staircase=True)
 train_op = tf.train.MomentumOptimizer(learning_rate, 0.9, use_nesterov=True).minimize(loss, global_step=batch)
 
 # 正确率
