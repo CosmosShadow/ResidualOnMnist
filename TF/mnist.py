@@ -14,6 +14,7 @@ mnist = data_mnist.read_data_sets(one_hot=True)
 
 x = tf.placeholder(tf.float32, [None, 784])
 y = tf.placeholder(tf.float32, [None,10])
+dropout = tf.placeholder(tf.float32, [1])
 
 x_reshape = tf.reshape(x, [-1, 28, 28, 1])
 seq = pt.wrap(x_reshape).sequential()
@@ -30,17 +31,17 @@ with pt.defaults_scope(activation_fn=None, l2loss=1e-4):
 		towers[0].conv2d(3, 16, stride=2)
 		towers[1].conv2d(3, 16, stride=2).leaky_relu().conv2d(3, 16)
 	seq.leaky_relu()
-	with seq.subdivide_with(2, tf.add_n) as towers:
-		towers[0].conv2d(3, 16)
-		towers[1].conv2d(3, 16).leaky_relu().conv2d(3, 16)
-	seq.leaky_relu()
+	# with seq.subdivide_with(2, tf.add_n) as towers:
+	# 	towers[0].conv2d(3, 16)
+	# 	towers[1].conv2d(3, 16).leaky_relu().conv2d(3, 16)
+	# seq.leaky_relu()
 	with seq.subdivide_with(2, tf.add_n) as towers:
 		towers[0].conv2d(3, 16, stride=2)
 		towers[1].conv2d(3, 16, stride=2).leaky_relu().conv2d(3, 16)
 	seq.leaky_relu()
-
 	seq.flatten()
 	seq.fully_connected(32).leaky_relu()
+	seq.dropout(dropout[0])
 	seq.fully_connected(10)					#TODO: network加上activation_fn=None
 
 softmax, loss = seq.softmax_classifier(10, labels=y)
@@ -55,7 +56,7 @@ def right_rate(sess, data):
 	accuracy_arr = []
 	for _ in range(int(data.num_examples/64)):
 		test_x, test_y = data.next_batch(64)
-		acc = sess.run(accuracy, feed_dict={x:test_x, y:test_y})
+		acc = sess.run(accuracy, feed_dict={x:test_x, y:test_y, dropout: [1.0]})
 		accuracy_arr.append(acc)
 	return np.mean(np.array(accuracy_arr))
 
@@ -72,12 +73,12 @@ with tf.Session(config=config) as sess:
 		loss_arr = []
 		for _ in range(100):
 			batch_xs, batch_ys = mnist.train.next_batch(64)
-			_, loss_val, lr = sess.run([train_op, loss, learning_rate], feed_dict={x: batch_xs, y: batch_ys})
+			_, loss_val, lr = sess.run([train_op, loss, learning_rate], feed_dict={x: batch_xs, y: batch_ys, dropout: [0.7]})
 			loss_arr.append(loss_val)
 		time_cost = time.time() - start_time
 		accuracy_value = right_rate(sess, mnist.test)
 		loss_mean = np.mean(np.array(loss_arr))
-		print("epoch: %2d   time: %5.3f   loss: %5.4f   lr: %5.4f   right: %5.3f" %(epoch, time_cost, loss_mean, lr, accuracy_value))
+		print("epoch: %2d   time: %5.3f   loss: %5.4f   lr: %5.4f   right: %5.3f%%" %(epoch, time_cost, loss_mean, lr, accuracy_value*100))
 
 # CNN
 # time: 2.466   right: 0.365
