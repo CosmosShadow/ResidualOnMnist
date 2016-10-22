@@ -5,6 +5,10 @@ import prettytensor as pt
 import numpy as np
 import cmtf.data.data_mnist as data_mnist
 
+@pt.Register
+def leaky_relu(input_pt):
+	return tf.select(tf.greater(input_pt, 0.0), input_pt, 0.01*input_pt)
+
 # 数据
 mnist = data_mnist.read_data_sets(one_hot=True)
 
@@ -13,18 +17,47 @@ y = tf.placeholder(tf.float32, [None,10])
 
 x_reshape = tf.reshape(x, [-1, 28, 28, 1])
 seq = pt.wrap(x_reshape).sequential()
-with pt.defaults_scope(activation_fn=tf.nn.relu):
-	with seq.subdivide(2) as towers:
-		towers[0].conv2d([7, 7], 16).max_pool(2, 2)
-		towers[1].conv2d([6, 6], 16).max_pool(2, 2)
-seq.flatten()
-seq.fully_connected(32, activation_fn=tf.nn.relu)
-seq.fully_connected(10, activation_fn=None)		#TODO: network加上activation_fn=None
+
+# CNN
+# seq.conv2d(6, 16)
+# seq.max_pool(2, 2)
+# seq.conv2d(6, 16)
+# seq.max_pool(2, 2)
+
+# residual
+with pt.defaults_scope(activation_fn=None, l2loss=1e-4):
+	with seq.subdivide_with(2, tf.add_n) as towers:
+		towers[0].conv2d(3, 16, stride=2)
+		towers[1].conv2d(3, 16, stride=2).leaky_relu().conv2d(3, 16)
+	seq.leaky_relu()
+	with seq.subdivide_with(2, tf.add_n) as towers:
+		towers[0].conv2d(3, 16)
+		towers[1].conv2d(3, 16).leaky_relu().conv2d(3, 16)
+	seq.leaky_relu()
+	with seq.subdivide_with(2, tf.add_n) as towers:
+		towers[0].conv2d(3, 16, stride=2)
+		towers[1].conv2d(3, 16, stride=2).leaky_relu().conv2d(3, 16)
+	seq.leaky_relu()
+
+	seq.flatten()
+	seq.fully_connected(32).leaky_relu()
+	seq.fully_connected(10)					#TODO: network加上activation_fn=None
 
 softmax, loss = seq.softmax_classifier(10, labels=y)
 accuracy = softmax.evaluate_classifier(y)
-optimizer = tf.train.GradientDescentOptimizer(0.01)  # learning rate
-train_op = pt.apply_optimizer(optimizer, losses=[loss])
+
+batch = tf.Variable(0, dtype=tf.float32)
+learning_rate = tf.train.exponential_decay(0.01, batch * 64, 64*100, 0.98, staircase=True)
+train_op = tf.train.MomentumOptimizer(learning_rate, 0.9, use_nesterov=True).minimize(loss, global_step=batch)
+
+# 正确率
+def right_rate(sess, data):
+	accuracy_arr = []
+	for _ in range(int(data.num_examples/64)):
+		test_x, test_y = data.next_batch(64)
+		acc = sess.run(accuracy, feed_dict={x:test_x, y:test_y})
+		accuracy_arr.append(acc)
+	return np.mean(np.array(accuracy_arr))
 
 # GPU使用率
 config = tf.ConfigProto()
@@ -33,28 +66,29 @@ config.gpu_options.allow_growth = True
 
 with tf.Session(config=config) as sess:
 	sess.run(tf.initialize_all_variables())
-	for _ in range(10):
+	for epoch in range(50):
 		start_time = time.time()
-		for _ in range(10):
-			batch_xs, batch_ys = mnist.train.next_batch(32)
-			_, loss_val = sess.run([train_op, loss], feed_dict={x: batch_xs, y: batch_ys})
+		lr = 0
+		loss_arr = []
+		for _ in range(100):
+			batch_xs, batch_ys = mnist.train.next_batch(64)
+			_, loss_val, lr = sess.run([train_op, loss, learning_rate], feed_dict={x: batch_xs, y: batch_ys})
+			loss_arr.append(loss_val)
 		time_cost = time.time() - start_time
-		print("time: %5.3f" %(time_cost))
+		accuracy_value = right_rate(sess, mnist.test)
+		loss_mean = np.mean(np.array(loss_arr))
+		print("epoch: %2d   time: %5.3f   loss: %5.4f   lr: %5.4f   right: %5.3f" %(epoch, time_cost, loss_mean, lr, accuracy_value))
 
-	accuracy_value = sess.run(accuracy, feed_dict={x:mnist.test.images[0:100], y:mnist.test.labels[0:100]})
-	print 'Accuracy: %g' % accuracy_value
+# CNN
+# time: 2.466   right: 0.365
+# time: 1.860   right: 0.605
+# time: 1.830   right: 0.745
+# time: 1.852   right: 0.86
+# time: 1.857   right: 0.885
 
-
-
-# time: 0.569
-# time: 0.268
-# time: 0.252
-# time: 0.272
-# time: 0.268
-# time: 0.266
-# time: 0.263
-# time: 0.270
-# time: 0.270
-# time: 0.261
-# Accuracy: 0.75
-
+# Residual
+# time: 2.199   right: 0.385
+# time: 1.596   right: 0.67
+# time: 1.592   right: 0.805
+# time: 1.621   right: 0.845
+# time: 1.634   right: 0.86
